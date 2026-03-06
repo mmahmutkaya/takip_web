@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
 import { User } from '@/types';
 import { api } from '@/lib/api';
 
@@ -14,6 +14,24 @@ interface AuthState {
   setTokens: (accessToken: string, refreshToken: string) => void;
 }
 
+const isBrowser = typeof window !== 'undefined';
+
+const noopStorage: StateStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+};
+
+function setLocalToken(key: 'accessToken' | 'refreshToken', value: string) {
+  if (!isBrowser) return;
+  localStorage.setItem(key, value);
+}
+
+function removeLocalToken(key: 'accessToken' | 'refreshToken') {
+  if (!isBrowser) return;
+  localStorage.removeItem(key);
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -23,22 +41,22 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setTokens: (accessToken, refreshToken) => {
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        setLocalToken('accessToken', accessToken);
+        setLocalToken('refreshToken', refreshToken);
         set({ accessToken, refreshToken });
       },
 
       login: async (email, password) => {
         const { data } = await api.post('/auth/login', { email, password });
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
+        setLocalToken('accessToken', data.accessToken);
+        setLocalToken('refreshToken', data.refreshToken);
         set({ user: data.user, accessToken: data.accessToken, refreshToken: data.refreshToken, isAuthenticated: true });
       },
 
       register: async (name, email, password) => {
         const { data } = await api.post('/auth/register', { name, email, password });
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
+        setLocalToken('accessToken', data.accessToken);
+        setLocalToken('refreshToken', data.refreshToken);
         set({ user: data.user, accessToken: data.accessToken, refreshToken: data.refreshToken, isAuthenticated: true });
       },
 
@@ -47,11 +65,15 @@ export const useAuthStore = create<AuthState>()(
         if (refreshToken) {
           try { await api.post('/auth/logout', { refreshToken }); } catch { /* ignore */ }
         }
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        removeLocalToken('accessToken');
+        removeLocalToken('refreshToken');
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
       },
     }),
-    { name: 'auth-storage', partialize: (s) => ({ user: s.user, accessToken: s.accessToken, refreshToken: s.refreshToken, isAuthenticated: s.isAuthenticated }) }
+    {
+      name: 'auth-storage',
+      storage: createJSONStorage(() => (isBrowser ? localStorage : noopStorage)),
+      partialize: (s) => ({ user: s.user, accessToken: s.accessToken, refreshToken: s.refreshToken, isAuthenticated: s.isAuthenticated }),
+    }
   )
 );
