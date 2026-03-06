@@ -17,13 +17,13 @@ export function NotificationBell() {
   const { data: notifications = [] } = useQuery<Notification[]>({
     queryKey: ['notifications'],
     queryFn: () => api.get('/notifications').then((r) => r.data),
-    refetchInterval: 30000,
+    refetchInterval: 300000,
   });
 
   const { data: unreadData } = useQuery<{ count: number }>({
     queryKey: ['notifications-unread'],
     queryFn: () => api.get('/notifications/unread-count').then((r) => r.data),
-    refetchInterval: 30000,
+    refetchInterval: 300000,
   });
 
   const markReadMutation = useMutation({
