@@ -54,7 +54,7 @@ export default function CaseDetailPage({ params }: { params: Promise<{ id: strin
         <ArrowLeft size={14} /> Proje
       </Link>
 
-      <div className="border rounded-xl p-6 bg-card mb-4">
+      <div className="border border-border/90 rounded-xl p-6 bg-card shadow-[0_10px_24px_rgba(15,23,42,0.12)] mb-4">
         <div className="flex items-start justify-between gap-4 mb-4">
           <h1 className="text-xl font-bold text-foreground">{caseItem.title}</h1>
           <div className="flex gap-2 shrink-0 flex-wrap">
@@ -104,7 +104,7 @@ export default function CaseDetailPage({ params }: { params: Promise<{ id: strin
         )}
       </div>
 
-      <div className="border rounded-xl bg-card">
+      <div className="border border-border/90 rounded-xl bg-card shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
         <div className="p-4 border-b">
           <h2 className="font-semibold">Gelişmeler</h2>
         </div>

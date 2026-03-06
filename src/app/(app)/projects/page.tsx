@@ -26,7 +26,7 @@ export default function ProjectsPage() {
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
       ) : projects.length === 0 ? (
-        <div className="text-center py-16 border rounded-xl">
+        <div className="text-center py-16 border border-border/90 rounded-xl bg-card shadow-md">
           <FolderOpen size={32} className="mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground">Henüz proje yok</p>
           <Link href="/projects/new">
@@ -37,7 +37,7 @@ export default function ProjectsPage() {
         <div className="grid gap-3">
           {projects.map((project) => (
             <Link key={project.id} href={`/projects/${project.id}`}>
-              <div className="border rounded-xl p-5 bg-card hover:shadow-md transition-shadow">
+              <div className="border border-border/90 rounded-xl p-5 bg-card shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:shadow-[0_16px_34px_rgba(15,23,42,0.16)] hover:-translate-y-0.5 transition-all duration-200">
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="font-semibold text-foreground">{project.name}</h3>
@@ -47,7 +47,7 @@ export default function ProjectsPage() {
                   </div>
                   <div className="text-right shrink-0 ml-4">
                     <span className="text-sm font-medium text-foreground">{project._count?.cases ?? 0}</span>
-                    <p className="text-xs text-muted-foreground">kayıt</p>
+                    <p className="text-xs text-muted-foreground">konu</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">

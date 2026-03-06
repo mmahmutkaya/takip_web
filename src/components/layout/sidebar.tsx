@@ -23,7 +23,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-60 shrink-0 border-r bg-card flex flex-col h-screen sticky top-0">
+    <aside className="w-60 shrink-0 border-r border-slate-400/60 bg-[hsl(214_16%_84%)] flex flex-col h-screen sticky top-0 shadow-[inset_-1px_0_0_rgba(100,116,139,0.35)]">
       <div className="p-4 border-b flex items-center justify-between">
         <span className="font-bold text-lg text-primary">Takip</span>
         <NotificationBell />

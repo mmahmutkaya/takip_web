@@ -100,7 +100,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(true)}><Trash2 size={14} /></Button>
           )}
           <Link href={`/projects/${id}/cases/new`}>
-            <Button size="sm"><Plus size={14} /> Yeni Kayıt</Button>
+            <Button size="sm"><Plus size={14} /> Yeni Konu</Button>
           </Link>
         </div>
       </div>
@@ -124,14 +124,14 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
       ) : cases.length === 0 ? (
-        <div className="text-center py-12 border rounded-xl text-muted-foreground">
-          Bu filtreye uygun kayıt bulunamadı.
+        <div className="text-center py-12 border border-border/90 rounded-xl bg-card text-muted-foreground shadow-md">
+          Bu filtreye uygun konu bulunamadı.
         </div>
       ) : (
         <div className="space-y-2">
           {cases.map((c) => (
             <Link key={c.id} href={`/projects/${id}/cases/${c.id}`}>
-              <div className="border rounded-xl p-4 bg-card hover:shadow-md transition-shadow">
+              <div className="border border-border/90 rounded-xl p-4 bg-card shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:shadow-[0_16px_34px_rgba(15,23,42,0.16)] hover:-translate-y-0.5 transition-all duration-200">
                 <div className="flex items-start gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">

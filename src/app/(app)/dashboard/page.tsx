@@ -25,7 +25,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard icon={FolderKanban} label="Proje" value={projects.length} color="bg-blue-50 text-blue-600" />
-        <StatCard icon={AlertCircle} label="Toplam Kayıt" value={totalCases} color="bg-orange-50 text-orange-600" />
+        <StatCard icon={AlertCircle} label="Toplam Konu" value={totalCases} color="bg-orange-50 text-orange-600" />
         <StatCard icon={CheckCircle2} label="Aktif Proje" value={projects.filter(p => p.isActive).length} color="bg-green-50 text-green-600" />
       </div>
 
@@ -35,7 +35,7 @@ export default function DashboardPage() {
           <Link href="/projects/new" className="text-sm text-primary hover:underline">+ Yeni Proje</Link>
         </div>
         {projects.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground border rounded-xl">
+          <div className="text-center py-12 text-muted-foreground border border-border/90 rounded-xl bg-card shadow-md">
             Henüz proje yok.{' '}
             <Link href="/projects/new" className="text-primary hover:underline">İlk projeyi oluşturun</Link>
           </div>
@@ -43,10 +43,10 @@ export default function DashboardPage() {
           <div className="grid gap-3">
             {projects.map((project) => (
               <Link key={project.id} href={`/projects/${project.id}`} className="block">
-                <div className="border rounded-xl p-4 bg-card hover:shadow-md transition-shadow">
+                <div className="border border-border/90 rounded-xl p-4 bg-card shadow-[0_10px_24px_rgba(15,23,42,0.12)] hover:shadow-[0_16px_34px_rgba(15,23,42,0.16)] hover:-translate-y-0.5 transition-all duration-200">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-foreground">{project.name}</h3>
-                    <span className="text-xs text-muted-foreground">{project._count?.cases ?? 0} kayıt</span>
+                    <span className="text-xs text-muted-foreground">{project._count?.cases ?? 0} konu</span>
                   </div>
                   {project.description && (
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{project.description}</p>
@@ -63,7 +63,7 @@ export default function DashboardPage() {
 
 function StatCard({ icon: Icon, label, value, color }: { icon: React.ElementType; label: string; value: number; color: string }) {
   return (
-    <div className="border rounded-xl p-4 bg-card">
+    <div className="border border-border/90 rounded-xl p-4 bg-card shadow-[0_10px_24px_rgba(15,23,42,0.12)]">
       <div className="flex items-center gap-3">
         <div className={`p-2 rounded-lg ${color}`}>
           <Icon size={18} />
