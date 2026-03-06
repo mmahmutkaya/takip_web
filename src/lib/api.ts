@@ -7,6 +7,20 @@ export const api = axios.create({
 
 const isBrowser = typeof window !== 'undefined';
 
+type TokenUpdateFn = (accessToken: string, refreshToken: string) => void;
+type LogoutFn = () => void;
+
+let _tokenUpdateCallback: TokenUpdateFn | null = null;
+let _forceLogoutCallback: LogoutFn | null = null;
+
+export function onTokenRefreshed(cb: TokenUpdateFn) {
+  _tokenUpdateCallback = cb;
+}
+
+export function onForceLogout(cb: LogoutFn) {
+  _forceLogoutCallback = cb;
+}
+
 function getStoredToken(key: 'accessToken' | 'refreshToken') {
   if (!isBrowser) return null;
   return localStorage.getItem(key);
@@ -22,6 +36,7 @@ function clearStoredTokens() {
   if (!isBrowser) return;
   localStorage.removeItem('accessToken');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem('auth-storage');
 }
 
 api.interceptors.request.use((config) => {
@@ -45,10 +60,12 @@ api.interceptors.response.use(
           { refreshToken }
         );
         setStoredTokens(data.accessToken, data.refreshToken);
+        _tokenUpdateCallback?.(data.accessToken, data.refreshToken);
         original.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(original);
       } catch {
         clearStoredTokens();
+        _forceLogoutCallback?.();
         if (isBrowser) window.location.href = '/login';
       }
     }

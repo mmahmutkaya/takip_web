@@ -4,13 +4,14 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, _hasHydrated } = useAuthStore();
   const router = useRouter();
 
   useEffect(() => {
+    if (!_hasHydrated) return;
     if (!isAuthenticated) router.replace('/login');
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, _hasHydrated, router]);
 
-  if (!isAuthenticated) return null;
+  if (!_hasHydrated || !isAuthenticated) return null;
   return <>{children}</>;
 }

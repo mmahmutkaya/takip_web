@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
 import { User } from '@/types';
-import { api } from '@/lib/api';
+import { api, onTokenRefreshed, onForceLogout } from '@/lib/api';
 
 interface AuthState {
   user: User | null;
   accessToken: string | null;
   refreshToken: string | null;
   isAuthenticated: boolean;
+  _hasHydrated: boolean;
+  setHasHydrated: (has: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -39,6 +41,9 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       isAuthenticated: false,
+      _hasHydrated: false,
+
+      setHasHydrated: (has) => set({ _hasHydrated: has }),
 
       setTokens: (accessToken, refreshToken) => {
         setLocalToken('accessToken', accessToken);
@@ -74,6 +79,19 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       storage: createJSONStorage(() => (isBrowser ? localStorage : noopStorage)),
       partialize: (s) => ({ user: s.user, accessToken: s.accessToken, refreshToken: s.refreshToken, isAuthenticated: s.isAuthenticated }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
     }
   )
 );
+
+onTokenRefreshed((accessToken, refreshToken) => {
+  useAuthStore.getState().setTokens(accessToken, refreshToken);
+});
+
+onForceLogout(() => {
+  removeLocalToken('accessToken');
+  removeLocalToken('refreshToken');
+  useAuthStore.setState({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
+});
