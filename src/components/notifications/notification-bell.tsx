@@ -75,7 +75,7 @@ export function NotificationBell() {
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full mt-2 w-80 rounded-xl border bg-card shadow-lg z-50">
+        <div className="absolute left-0 top-full mt-2 w-80 rounded-xl border bg-card shadow-lg z-[9999]">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <span className="font-semibold text-sm">Bildirimler</span>
             {unreadCount > 0 && (
