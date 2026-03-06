@@ -34,8 +34,14 @@ export default function LoginPage() {
       await login(data.email, data.password);
       router.push('/dashboard');
     } catch (e: unknown) {
-      const err = e as { response?: { data?: { message?: string } } };
-      const msg = err.response?.data?.message ?? 'Giriş başarısız';
+      const err = e as { response?: { data?: { message?: string } }; code?: string; message?: string };
+      const isTimeout = err.code === 'ECONNABORTED' || err.message?.includes('timeout');
+      const isNetworkError = !err.response && !isTimeout;
+      const msg = isTimeout
+        ? 'Sunucu yanıt vermiyor. Lütfen tekrar deneyin.'
+        : isNetworkError
+          ? 'Sunucuya bağlanılamadı. İnternet bağlantınızı kontrol edin.'
+          : (err.response?.data?.message ?? 'Giriş başarısız');
       setError(msg);
       if (msg.includes('doğrulanmamış')) {
         setLastEmail(data.email);

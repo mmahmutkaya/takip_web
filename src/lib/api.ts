@@ -19,6 +19,7 @@ const API_BASE_URL = resolveApiBaseUrl();
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: false,
+  timeout: 15000,
 });
 
 const isBrowser = typeof window !== 'undefined';
