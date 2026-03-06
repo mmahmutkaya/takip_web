@@ -20,6 +20,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
   const [error, setError] = useState('');
+  const [showResend, setShowResend] = useState(false);
+  const [lastEmail, setLastEmail] = useState('');
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -27,12 +29,18 @@ export default function LoginPage() {
 
   const onSubmit = async (data: FormData) => {
     setError('');
+    setShowResend(false);
     try {
       await login(data.email, data.password);
       router.push('/dashboard');
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
-      setError(err.response?.data?.message ?? 'Giriş başarısız');
+      const msg = err.response?.data?.message ?? 'Giriş başarısız';
+      setError(msg);
+      if (msg.includes('doğrulanmamış')) {
+        setLastEmail(data.email);
+        setShowResend(true);
+      }
     }
   };
 
@@ -56,6 +64,16 @@ export default function LoginPage() {
               {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
             </div>
             {error && <p className="text-sm text-destructive text-center">{error}</p>}
+            {showResend && (
+              <p className="text-sm text-center">
+                <Link
+                  href={`/verify-email?email=${encodeURIComponent(lastEmail)}`}
+                  className="text-primary hover:underline"
+                >
+                  Doğrulama linkini yeniden gönder
+                </Link>
+              </p>
+            )}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Giriş yapılıyor...' : 'Giriş Yap'}
             </Button>

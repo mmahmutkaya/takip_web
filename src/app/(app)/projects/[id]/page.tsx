@@ -100,7 +100,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
             <Button variant="destructive" size="sm" onClick={() => setDeleteConfirm(true)}><Trash2 size={14} /></Button>
           )}
           <Link href={`/projects/${id}/cases/new`}>
-            <Button size="sm"><Plus size={14} /> Yeni Case</Button>
+            <Button size="sm"><Plus size={14} /> Yeni Kayıt</Button>
           </Link>
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
         <div className="text-center py-12 text-muted-foreground">Yükleniyor...</div>
       ) : cases.length === 0 ? (
         <div className="text-center py-12 border rounded-xl text-muted-foreground">
-          Bu filtreye uygun case bulunamadı.
+          Bu filtreye uygun kayıt bulunamadı.
         </div>
       ) : (
         <div className="space-y-2">

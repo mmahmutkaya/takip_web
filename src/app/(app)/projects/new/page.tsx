@@ -13,9 +13,9 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 const schema = z.object({
-  name: z.string().min(2).max(100),
-  slug: z.string().min(2).regex(/^[a-z0-9-]+$/, 'Sadece küçük harf, rakam ve tire'),
-  description: z.string().max(500).optional(),
+  name: z.string().min(2, 'Proje adı en az 2 karakter olmalı').max(100, 'Proje adı en fazla 100 karakter olabilir'),
+  slug: z.string().min(2, 'Slug en az 2 karakter olmalı').regex(/^[a-z0-9-]+$/, 'Sadece küçük harf, rakam ve tire'),
+  description: z.string().max(500, 'Açıklama en fazla 500 karakter olabilir').optional(),
 });
 type FormData = z.infer<typeof schema>;
 

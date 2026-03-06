@@ -18,9 +18,9 @@ export default function ProjectsPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Projeler</h1>
-        <Link href="/projects/new">
-          <Button size="sm"><Plus size={14} /> Yeni Proje</Button>
-        </Link>
+        <Button asChild size="sm">
+          <Link href="/projects/new"><Plus size={14} /> Yeni Proje</Link>
+        </Button>
       </div>
 
       {isLoading ? (
@@ -29,9 +29,9 @@ export default function ProjectsPage() {
         <div className="text-center py-16 border rounded-xl">
           <FolderOpen size={32} className="mx-auto text-muted-foreground mb-3" />
           <p className="text-muted-foreground">Henüz proje yok</p>
-          <Link href="/projects/new">
-            <Button className="mt-4" size="sm">İlk Projeyi Oluştur</Button>
-          </Link>
+          <Button asChild className="mt-4" size="sm">
+            <Link href="/projects/new">İlk Projeyi Oluştur</Link>
+          </Button>
         </div>
       ) : (
         <div className="grid gap-3">
@@ -47,7 +47,7 @@ export default function ProjectsPage() {
                   </div>
                   <div className="text-right shrink-0 ml-4">
                     <span className="text-sm font-medium text-foreground">{project._count?.cases ?? 0}</span>
-                    <p className="text-xs text-muted-foreground">case</p>
+                    <p className="text-xs text-muted-foreground">kayıt</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">

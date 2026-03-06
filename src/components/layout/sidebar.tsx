@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { NotificationBell } from '@/components/notifications/notification-bell';
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Genel Bakış', icon: LayoutDashboard },
   { href: '/projects', label: 'Projeler', icon: FolderKanban },
 ];
 

@@ -23,7 +23,9 @@ export default function MembersPage({ params }: { params: Promise<{ id: string }
   const queryClient = useQueryClient();
   const { user: currentUser } = useAuthStore();
 
-  const [email, setEmail] = useState('');
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteTitle, setInviteTitle] = useState('');
+  const [inviteRole, setInviteRole] = useState<ProjectRole>('MEMBER');
   const [inviteError, setInviteError] = useState('');
 
   const [editingMember, setEditingMember] = useState<ProjectMember | null>(null);
@@ -39,10 +41,13 @@ export default function MembersPage({ params }: { params: Promise<{ id: string }
   const canManage = myRole === 'OWNER' || myRole === 'ADMIN';
 
   const inviteMutation = useMutation({
-    mutationFn: (email: string) => api.post(`/projects/${projectId}/members`, { email }).then((r) => r.data),
+    mutationFn: ({ email, role, title }: { email: string; role: ProjectRole; title: string }) =>
+      api.post(`/projects/${projectId}/members`, { email, role, title: title || undefined }).then((r) => r.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['members', projectId] });
-      setEmail('');
+      setInviteEmail('');
+      setInviteTitle('');
+      setInviteRole('MEMBER');
       setInviteError('');
     },
     onError: (e: unknown) => {
@@ -71,6 +76,11 @@ export default function MembersPage({ params }: { params: Promise<{ id: string }
     setEditTitle(member.title ?? '');
   }
 
+  function handleInvite() {
+    if (!inviteEmail.trim()) return;
+    inviteMutation.mutate({ email: inviteEmail, role: inviteRole, title: inviteTitle });
+  }
+
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <Link href={`/projects/${projectId}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
@@ -80,18 +90,47 @@ export default function MembersPage({ params }: { params: Promise<{ id: string }
 
       {canManage && (
         <div className="border rounded-xl p-5 bg-card mb-6">
-          <h2 className="font-semibold mb-3">Üye Davet Et</h2>
-          <div className="flex gap-2">
-            <div className="flex-1">
+          <h2 className="font-semibold mb-4">Üye Davet Et</h2>
+          <div className="space-y-3">
+            <div>
+              <Label className="mb-1.5 block">E-posta</Label>
               <Input
                 placeholder="ornek@sirket.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && inviteMutation.mutate(email)}
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
               />
-              {inviteError && <p className="text-xs text-destructive mt-1">{inviteError}</p>}
             </div>
-            <Button size="sm" onClick={() => inviteMutation.mutate(email)} disabled={!email.trim() || inviteMutation.isPending}>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label className="mb-1.5 block">Rol</Label>
+                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as ProjectRole)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EDITABLE_ROLES.map((r) => (
+                      <SelectItem key={r} value={r}>{ROLE_LABELS[r]}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="mb-1.5 block">Ünvan (opsiyonel)</Label>
+                <Input
+                  placeholder="Yazılım Geliştirici"
+                  value={inviteTitle}
+                  onChange={(e) => setInviteTitle(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                />
+              </div>
+            </div>
+            {inviteError && <p className="text-xs text-destructive">{inviteError}</p>}
+            <Button
+              size="sm"
+              onClick={handleInvite}
+              disabled={!inviteEmail.trim() || inviteMutation.isPending}
+            >
               <UserPlus size={14} /> Davet Et
             </Button>
           </div>
@@ -171,75 +210,6 @@ export default function MembersPage({ params }: { params: Promise<{ id: string }
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  OWNER: 'Sahip', ADMIN: 'Yönetici', MEMBER: 'Üye', VIEWER: 'Gözlemci',
-};
-
-export default function MembersPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id: projectId } = use(params);
-  const queryClient = useQueryClient();
-  const [email, setEmail] = useState('');
-  const [inviteError, setInviteError] = useState('');
-
-  const { data: members = [] } = useQuery<ProjectMember[]>({
-    queryKey: ['members', projectId],
-    queryFn: () => api.get(`/projects/${projectId}/members`).then((r) => r.data),
-  });
-
-  const inviteMutation = useMutation({
-    mutationFn: (email: string) => api.post(`/projects/${projectId}/members`, { email }).then((r) => r.data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['members', projectId] });
-      setEmail('');
-      setInviteError('');
-    },
-    onError: (e: unknown) => {
-      const err = e as { response?: { data?: { message?: string } } };
-      setInviteError(err.response?.data?.message ?? 'Davet başarısız');
-    },
-  });
-
-  return (
-    <div className="p-6 max-w-2xl mx-auto">
-      <Link href={`/projects/${projectId}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
-        <ArrowLeft size={14} /> Proje
-      </Link>
-      <h1 className="text-2xl font-bold mb-6">Proje Üyeleri</h1>
-
-      <div className="border rounded-xl p-5 bg-card mb-6">
-        <h2 className="font-semibold mb-3">Üye Davet Et</h2>
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <Input
-              placeholder="ornek@sirket.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && inviteMutation.mutate(email)}
-            />
-            {inviteError && <p className="text-xs text-destructive mt-1">{inviteError}</p>}
-          </div>
-          <Button size="sm" onClick={() => inviteMutation.mutate(email)} disabled={!email.trim() || inviteMutation.isPending}>
-            <UserPlus size={14} /> Davet Et
-          </Button>
-        </div>
-      </div>
-
-      <div className="border rounded-xl bg-card divide-y">
-        {members.map((member) => (
-          <div key={member.id} className="flex items-center justify-between p-4">
-            <div>
-              <span className="font-medium text-foreground">{member.user.name}</span>
-              <p className="text-sm text-muted-foreground">{member.user.email}</p>
-              {member.title && <p className="text-xs text-muted-foreground">{member.title}</p>}
-            </div>
-            <span className="text-sm text-muted-foreground">{ROLE_LABELS[member.role] ?? member.role}</span>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

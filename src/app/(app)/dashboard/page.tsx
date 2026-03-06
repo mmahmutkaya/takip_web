@@ -25,7 +25,7 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard icon={FolderKanban} label="Proje" value={projects.length} color="bg-blue-50 text-blue-600" />
-        <StatCard icon={AlertCircle} label="Toplam Case" value={totalCases} color="bg-orange-50 text-orange-600" />
+        <StatCard icon={AlertCircle} label="Toplam Kayıt" value={totalCases} color="bg-orange-50 text-orange-600" />
         <StatCard icon={CheckCircle2} label="Aktif Proje" value={projects.filter(p => p.isActive).length} color="bg-green-50 text-green-600" />
       </div>
 
@@ -46,7 +46,7 @@ export default function DashboardPage() {
                 <div className="border rounded-xl p-4 bg-card hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-foreground">{project.name}</h3>
-                    <span className="text-xs text-muted-foreground">{project._count?.cases ?? 0} case</span>
+                    <span className="text-xs text-muted-foreground">{project._count?.cases ?? 0} kayıt</span>
                   </div>
                   {project.description && (
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{project.description}</p>

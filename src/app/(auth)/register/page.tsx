@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuthStore } from '@/store/auth.store';
+import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +19,6 @@ type FormData = z.infer<typeof schema>;
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register: authRegister } = useAuthStore();
   const [error, setError] = useState('');
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -29,8 +28,8 @@ export default function RegisterPage() {
   const onSubmit = async (data: FormData) => {
     setError('');
     try {
-      await authRegister(data.name, data.email, data.password);
-      router.push('/dashboard');
+      await api.post('/auth/register', { name: data.name, email: data.email, password: data.password });
+      router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } };
       setError(err.response?.data?.message ?? 'Kayıt başarısız');

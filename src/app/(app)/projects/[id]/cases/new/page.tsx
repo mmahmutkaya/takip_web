@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { use } from 'react';
 
 const schema = z.object({
-  title: z.string().min(2).max(200),
+  title: z.string().min(2, 'Başlık en az 2 karakter olmalı').max(200, 'Başlık en fazla 200 karakter olabilir'),
   description: z.string().optional(),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']),
   assigneeId: z.string().optional(),
@@ -53,12 +53,12 @@ export default function NewCasePage({ params }: { params: Promise<{ id: string }
       <Link href={`/projects/${projectId}`} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
         <ArrowLeft size={14} /> Proje
       </Link>
-      <h1 className="text-2xl font-bold mb-6">Yeni Case</h1>
+      <h1 className="text-2xl font-bold mb-6">Yeni Kayıt</h1>
       <div className="border rounded-xl p-6 bg-card">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
             <Label htmlFor="title">Başlık</Label>
-            <Input id="title" placeholder="Case başlığı..." {...register('title')} />
+            <Input id="title" placeholder="Kayıt başlığı..." {...register('title')} />
             {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
           </div>
           <div className="space-y-1.5">
@@ -93,7 +93,7 @@ export default function NewCasePage({ params }: { params: Promise<{ id: string }
             <p className="text-sm text-destructive">{(mutateError as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Hata oluştu'}</p>
           )}
           <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? 'Oluşturuluyor...' : 'Case Oluştur'}
+            {isSubmitting ? 'Oluşturuluyor...' : 'Kayıt Oluştur'}
           </Button>
         </form>
       </div>

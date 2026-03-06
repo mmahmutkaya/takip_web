@@ -3,8 +3,8 @@ import './globals.css';
 import { Providers } from '@/components/providers';
 
 export const metadata: Metadata = {
-  title: 'Takip - Case Yönetim Sistemi',
-  description: 'Projelerinizi ve case lerinizi takip edin',
+  title: 'Takip - Kayıt Yönetim Sistemi',
+  description: 'Projelerinizi ve kayıtlarınızı takip edin',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
