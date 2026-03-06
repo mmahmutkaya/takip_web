@@ -1,7 +1,23 @@
 import axios from 'axios';
 
+const API_PREFIX = '/api/v1';
+
+function resolveApiBaseUrl() {
+  const raw = process.env.NEXT_PUBLIC_API_URL?.trim() || 'http://localhost:3001/api/v1';
+  const normalized = raw.endsWith('/') ? raw.slice(0, -1) : raw;
+
+  // Backend uses a global `api/v1` prefix; append it if env is missing the prefix.
+  if (normalized.endsWith(API_PREFIX)) {
+    return normalized;
+  }
+
+  return `${normalized}${API_PREFIX}`;
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
+
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1',
+  baseURL: API_BASE_URL,
   withCredentials: false,
 });
 
@@ -55,10 +71,7 @@ api.interceptors.response.use(
       try {
         const refreshToken = getStoredToken('refreshToken');
         if (!refreshToken) throw new Error('No refresh token');
-        const { data } = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1'}/auth/refresh`,
-          { refreshToken }
-        );
+        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
         setStoredTokens(data.accessToken, data.refreshToken);
         _tokenUpdateCallback?.(data.accessToken, data.refreshToken);
         original.headers.Authorization = `Bearer ${data.accessToken}`;
