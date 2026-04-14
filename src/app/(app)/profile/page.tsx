@@ -2,16 +2,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { User } from '@/types';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/auth.store';
-import { User as UserIcon, Lock } from 'lucide-react';
+import { User as UserIcon, Lock, Camera } from 'lucide-react';
+import Image from 'next/image';
+
+const MAX_AVATAR_SIZE_BYTES = 5 * 1024 * 1024;
 
 export default function ProfilePage() {
   const queryClient = useQueryClient();
-  const { user: storeUser, login } = useAuthStore();
 
   const { data: profile } = useQuery<User>({
     queryKey: ['me'],
@@ -20,6 +22,9 @@ export default function ProfilePage() {
 
   const [name, setName] = useState('');
   const [profileMsg, setProfileMsg] = useState('');
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -38,6 +43,28 @@ export default function ProfilePage() {
       useAuthStore.setState((s) => ({ ...s, user: { ...s.user!, name: updated.name } }));
       setProfileMsg('Profil güncellendi.');
       setTimeout(() => setProfileMsg(''), 3000);
+    },
+  });
+
+  const uploadAvatarMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      return api.post('/users/me/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }).then((r) => r.data);
+    },
+    onSuccess: (updated: User) => {
+      queryClient.invalidateQueries({ queryKey: ['me'] });
+      useAuthStore.setState((s) => ({ ...s, user: { ...s.user!, avatarUrl: updated.avatarUrl } }));
+      setAvatarPreview(null);
+      setAvatarError('');
+      setProfileMsg('Profil fotoğrafı güncellendi.');
+      setTimeout(() => setProfileMsg(''), 3000);
+    },
+    onError: (e: unknown) => {
+      const err = e as { response?: { data?: { message?: string } } };
+      setAvatarError(err.response?.data?.message ?? 'Fotoğraf yüklenemedi');
     },
   });
 
@@ -67,8 +94,12 @@ export default function ProfilePage() {
 
       <div className="border rounded-xl p-5 bg-card mb-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-            <UserIcon size={18} className="text-primary" />
+          <div className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+            {profile?.avatarUrl ? (
+              <Image src={profile.avatarUrl} alt={profile.name} fill className="object-cover" />
+            ) : (
+              <UserIcon size={18} className="text-primary" />
+            )}
           </div>
           <div>
             <p className="font-medium">{profile.name}</p>
@@ -77,6 +108,64 @@ export default function ProfilePage() {
               {PLAN_LABELS[profile.plan] ?? profile.plan}
             </span>
           </div>
+        </div>
+
+        <h2 className="font-semibold mb-3 flex items-center gap-2"><Camera size={14} /> Profil Fotoğrafı</h2>
+        <div className="space-y-3 mb-5">
+          <div className="flex items-center gap-4">
+            <div className="relative w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden border border-border">
+              {avatarPreview ? (
+                <Image src={avatarPreview} alt="Önizleme" fill className="object-cover" />
+              ) : profile.avatarUrl ? (
+                <Image src={profile.avatarUrl} alt={profile.name} fill className="object-cover" />
+              ) : (
+                <UserIcon size={24} className="text-primary" />
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > MAX_AVATAR_SIZE_BYTES) {
+                    setAvatarError('Dosya boyutu 5MB\'den küçük olmalıdır');
+                    return;
+                  }
+                  setAvatarError('');
+                  const reader = new FileReader();
+                  reader.onload = (ev) => setAvatarPreview(ev.target?.result as string);
+                  reader.readAsDataURL(file);
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Fotoğraf Seç
+              </Button>
+              {avatarPreview && (
+                <Button
+                  type="button"
+                  size="sm"
+                  className="ml-2"
+                  onClick={() => {
+                    const file = fileInputRef.current?.files?.[0];
+                    if (file) uploadAvatarMutation.mutate(file);
+                  }}
+                  disabled={uploadAvatarMutation.isPending}
+                >
+                  Yükle
+                </Button>
+              )}
+            </div>
+          </div>
+          {avatarError && <p className="text-xs text-destructive">{avatarError}</p>}
         </div>
 
         <h2 className="font-semibold mb-3 flex items-center gap-2"><UserIcon size={14} /> Profil Düzenle</h2>

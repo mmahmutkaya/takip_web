@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
 import { NotificationBell } from '@/components/notifications/notification-bell';
+import Image from 'next/image';
 
 const navItems = [
   { href: '/dashboard', label: 'Genel Bakış', icon: LayoutDashboard },
@@ -47,8 +48,12 @@ export function Sidebar() {
       </nav>
       <div className="p-4 border-t">
         <Link href="/profile" className="flex items-center gap-2 mb-3 group">
-          <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-            <User size={13} className="text-primary" />
+          <div className="relative w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden">
+            {user?.avatarUrl ? (
+              <Image src={user.avatarUrl} alt={user.name} fill className="object-cover" />
+            ) : (
+              <User size={13} className="text-primary" />
+            )}
           </div>
           <div className="min-w-0">
             <div className="text-sm font-medium text-foreground truncate group-hover:underline">{user?.name}</div>

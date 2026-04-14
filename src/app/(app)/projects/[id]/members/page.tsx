@@ -4,13 +4,14 @@ import { api } from '@/lib/api';
 import { ProjectMember, ProjectRole } from '@/types';
 import { use, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, UserPlus, Pencil, Trash2, User as UserIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useAuthStore } from '@/store/auth.store';
+import Image from 'next/image';
 
 const ROLE_LABELS: Record<string, string> = {
   OWNER: 'Sahip', ADMIN: 'Yönetici', MEMBER: 'Üye', VIEWER: 'Gözlemci',
@@ -139,13 +140,20 @@ export default function MembersPage({ params }: { params: Promise<{ id: string }
 
       <div className="border rounded-xl bg-card divide-y">
         {members.map((member) => (
-          <div key={member.id} className="flex items-center justify-between p-4">
-            <div>
+          <div key={member.id} className="flex items-center gap-4 p-4">
+            <div className="relative w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 overflow-hidden border border-border">
+              {member.user.avatarUrl ? (
+                <Image src={member.user.avatarUrl} alt={member.user.name} fill className="object-cover" />
+              ) : (
+                <UserIcon size={18} className="text-primary" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
               <span className="font-medium text-foreground">{member.user.name}</span>
               <p className="text-sm text-muted-foreground">{member.user.email}</p>
               {member.title && <p className="text-xs text-muted-foreground">{member.title}</p>}
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 shrink-0">
               <span className="text-sm text-muted-foreground">{ROLE_LABELS[member.role] ?? member.role}</span>
               {canManage && member.role !== 'OWNER' && (
                 <div className="flex gap-1">
